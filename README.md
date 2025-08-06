@@ -22,7 +22,8 @@ This is an automated workflow built using n8n that sends daily weather updates v
 
 Download and import `weather-report.json` into your local n8n instance.
 
-How to Use
-1.Import this JSON into your local n8n instance
-2.Set up your Gmail credentials
-3.Customize the city, email, or schedule if needed
+## How to Use
+
+1. Import this JSON into your local n8n instance  
+2. Set up your Gmail credentials  
+3. Customize the city, email, or schedule if needed  
