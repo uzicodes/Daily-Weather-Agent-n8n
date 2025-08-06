@@ -1,0 +1,147 @@
+{
+  "name": "weather report",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        -112
+      ],
+      "id": "fe69e2b4-5b73-4f91-9c32-ddec4575c8e3",
+      "name": "manual test"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10
+            },
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -224,
+        64
+      ],
+      "id": "f56ff25a-7c2e-44c5-a98c-c2e97155e304",
+      "name": "10am schedule"
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast?latitude=23.7104&longitude=90.4074&daily=sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,uv_index_clear_sky_max,weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min&hourly=temperature_2m,rain,precipitation,wind_speed_10m,weather_code&current=rain,temperature_2m,relative_humidity_2m,apparent_temperature,is_day",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        48,
+        -16
+      ],
+      "id": "d5ec8878-1690-4b7e-8802-43a85f8cef8e",
+      "name": "weather data"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This script processes the input JSON to extract specific weather data and format it into a message.\nconst weatherData = items[0].json;\n\n// Extract current weather data\nconst current = weatherData.current;\nconst currentTemp = current.temperature_2m;\nconst apparentTemp = current.apparent_temperature;\nconst humidity = current.relative_humidity_2m;\nconst rain = current.rain;\n\n// Extract daily forecast for the next 3 days\nconst daily = weatherData.daily;\nconst forecast = [];\nconst numDays = 3;\n\nfor (let i = 1; i <= numDays; i++) {\n  const date = daily.time[i];\n  const maxTemp = daily.temperature_2m_max[i];\n  const minTemp = daily.temperature_2m_min[i];\n  const weatherCode = daily.weather_code[i];\n\n  // Map WMO weather codes to descriptions\n  const weatherDescriptions = {\n    0: 'Clear sky',\n    1: 'Mainly clear',\n    2: 'Partly cloudy',\n    3: 'Overcast',\n    45: 'Fog',\n    48: 'Depositing rime fog',\n    51: 'Drizzle: Light',\n    53: 'Drizzle: Moderate',\n    55: 'Drizzle: Dense intensity',\n    56: 'Freezing Drizzle: Light',\n    57: 'Freezing Drizzle: Dense intensity',\n    61: 'Rain: Slight',\n    63: 'Rain: Moderate',\n    65: 'Rain: Heavy intensity',\n    66: 'Freezing Rain: Light',\n    67: 'Freezing Rain: Heavy intensity',\n    71: 'Snow fall: Slight',\n    73: 'Snow fall: Moderate',\n    75: 'Snow fall: Heavy intensity',\n    77: 'Snow grains',\n    80: 'Rain showers: Slight',\n    81: 'Rain showers: Moderate',\n    82: 'Rain showers: Violent',\n    85: 'Snow showers: Slight',\n    86: 'Snow showers: Heavy',\n    95: 'Thunderstorm: Slight or moderate',\n    96: 'Thunderstorm with slight hail',\n    99: 'Thunderstorm with heavy hail',\n  };\n\n  const weatherDescription = weatherDescriptions[weatherCode] || 'Unknown';\n\n  forecast.push(`- **${date}**: Min: ${minTemp}\\u00B0C, Max: ${maxTemp}\\u00B0C, Weather: ${weatherDescription}`);\n}\n\n// Construct the final message\nconst message = `In Dhaka, the current weather is:\\n\\u26C5 Temperature: ${currentTemp}\\u00B0C (Feels like: ${apparentTemp}\\u00B0C)\\n\\u{1F4A7} Humidity: ${humidity}%\\n\\u{1F327} Rain: ${rain} mm\\n\\nForecast for the next 3 days:\\n${forecast.join('\\n')}`;\n\n// Return the constructed message in the n8n format\nreturn [{\n  json: {\n    message\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        -16
+      ],
+      "id": "df20ece5-b0db-4c57-8866-a083003b23b5",
+      "name": "messege format"
+    },
+    {
+      "parameters": {
+        "sendTo": "tunituni689@gmail.com",
+        "subject": "Weather Report Today !",
+        "emailType": "text",
+        "message": "={{ $json.message }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        464,
+        -16
+      ],
+      "id": "9993d6ba-7c76-4c2f-817f-5ff41956013c",
+      "name": "Send a message",
+      "webhookId": "b326b291-7d48-40f4-8fdc-39feb924fcfc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HDoK1Hfnm54Wvnes",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "10am schedule": {
+      "main": [
+        [
+          {
+            "node": "weather data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "manual test": {
+      "main": [
+        [
+          {
+            "node": "weather data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "weather data": {
+      "main": [
+        [
+          {
+            "node": "messege format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "messege format": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "63a787ef-54ae-4277-afdf-ac376db22f4f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "828ca9042247626855e33858b9110f7cd086708f8ef08447dd2c4b5fa0b3fa04"
+  },
+  "id": "vb8mfdMxvj9HAef5",
+  "tags": []
+}
