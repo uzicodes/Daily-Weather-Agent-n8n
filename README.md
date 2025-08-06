@@ -1,4 +1,4 @@
-# n8n Weather Report Bot
+# n8n Weather Report Agent
 
 This is an automated workflow built using n8n that sends daily weather updates via email.
 ![screenshot](./screenshot.png)
