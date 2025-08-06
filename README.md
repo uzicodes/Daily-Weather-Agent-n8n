@@ -1,6 +1,7 @@
 # n8n Weather Report Bot
 
 This is an automated workflow built using n8n that sends daily weather updates via email.
+![screenshot](./screenshot.png)
 
 ## Feature
 
@@ -20,10 +21,6 @@ This is an automated workflow built using n8n that sends daily weather updates v
 ## Exported Workflow
 
 Download and import `weather-report.json` into your local n8n instance.
-
-
-Screenshot
-![screenshot](./screenshot.png)
 
 How to Use
 1.Import this JSON into your local n8n instance
